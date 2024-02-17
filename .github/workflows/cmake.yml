@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: BSL-1.0 OR BlueOak-1.0.0
 
-name: CMake + Conan (GCC 10)
+name: CMake + Conan
 
 on:
   push:
@@ -10,18 +10,25 @@ on:
   pull_request:
     branches: [ "master" ]
 
+
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  CC: gcc-10
-  CXX: g++-10
 
 jobs:
   build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-22.04
+          - windows-latest
+          - macos-latest
+
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-latest
+    runs-on: ${{matrix.os}}
 
     steps:
     - uses: actions/checkout@v4
@@ -44,7 +51,7 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       # Also set PREFIX and MODULE paths for find_package() via CMAKE_MODULE_PATH and CMAKE_PREFIX_PATH variables.
       # See https://cmake.org/cmake/help/latest/command/find_package.html?highlight=find_package for search modes.
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_PREFIX_PATH=${{github.workspace}}/conan-deps -DCMAKE_MODULE_PATH=${{github.workspace}}/conan-deps
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_PREFIX_PATH="${{github.workspace}}/conan-deps" -DCMAKE_MODULE_PATH="${{github.workspace}}/conan-deps"
 
     - name: Build
       # Build your program with the given configuration
